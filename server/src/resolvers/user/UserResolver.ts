@@ -28,6 +28,20 @@ export class UserResolver {
         ],
       };
     }
+
+    try {
+      const hashedPassword = await bcrypt.hash(registerOptions.password, 10);
+
+      const createdUser = await User.create({
+        email: registerOptions.email,
+        username: registerOptions.username,
+        password: hashedPassword,
+      }).save();
+
+      return { user: createdUser };
+    } catch (error) {
+      return { errors: [{ message: "Internal Server Error" }] };
+    }
   }
 
   @Query(() => String)
