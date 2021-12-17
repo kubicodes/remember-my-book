@@ -5,7 +5,7 @@
   "author": "kubicodes",
   "license": "MIT",
   "scripts": {
-    "gen-env": "gen-env-types .env.* -o src/env.d.ts -e .",
+    "gen-env": "gen-env-types .env -o src/env.d.ts -e .",
     "watch": "tsc -w",
     "dev": "nodemon dist/index.js"
   },
