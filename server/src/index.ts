@@ -1,11 +1,9 @@
-import express from "express";
-import "dotenv-safe/config";
-import cors from "cors";
-import { __prod__ } from "./constants/__prod__";
-import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server-express";
+import cors from "cors";
+import "dotenv-safe/config";
+import express from "express";
 import { buildSchema } from "type-graphql";
-import { HelloWorldResolver } from "./resolvers/HelloWorld";
+import { createConnection } from "typeorm";
 
 const main = async () => {
   const dbConnection = await createConnection();
