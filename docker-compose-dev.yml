@@ -1,0 +1,14 @@
+version: "1"
+
+services:
+  app:
+    container_name: app-dev
+    build:
+      context: . # Take dockerfile from root
+      target: builder # Stop after builder
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules # prevents to get overwritten from host computer as it's more specific
+    ports:
+      - 8080:8080 # left side needs to match with that what's in development.yml
+    command: npm run start:dev # override npm run build from Dockerfile

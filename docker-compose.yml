@@ -1,0 +1,10 @@
+version: "1"
+
+services:
+  app:
+    container_name: app
+    build:
+      context: . # Take dockerfile from root
+      target: production # Including production image of dockerfile now
+    ports:
+      - 8080:8080 # left side needs to match with that what's in production.yml
