@@ -1,9 +1,14 @@
-import express from "express";
-import "dotenv-safe/config";
+import { ApolloServer } from "apollo-server-express";
 import cors from "cors";
-import { __prod__ } from "./constants/__prod__";
+import "dotenv-safe/config";
+import express from "express";
+import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
 
 const main = async () => {
+  const dbConnection = await createConnection();
+  await dbConnection.runMigrations();
+
   const app = express();
 
   app.use(
@@ -12,6 +17,20 @@ const main = async () => {
       credentials: true,
     })
   );
+
+  const apolloServer = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [`${__dirname}/resolvers/**/*.{ts,js}`],
+      validate: false,
+    }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+    }),
+  });
+
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app });
 
   app.listen(process.env.PORT, () => {
     console.log(`Server started on ${process.env.PORT}`);
