@@ -1,0 +1,38 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "author": "kubicodes",
+  "license": "MIT",
+  "scripts": {
+    "gen-env": "gen-env-types .env.* -o src/env.d.ts -e .",
+    "watch": "tsc -w",
+    "dev": "nodemon dist/index.js"
+  },
+  "dependencies": {
+    "apollo-server-express": "^3.5.0",
+    "bcrypt": "^5.0.1",
+    "connect-redis": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv-safe": "^8.2.0",
+    "express": "^4.17.2",
+    "express-session": "^1.17.2",
+    "graphql": "^16.1.0",
+    "ioredis": "^4.28.2",
+    "mysql": "^2.18.1",
+    "type-graphql": "^1.1.1",
+    "typeorm": "^0.2.41"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/connect-redis": "^0.0.18",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/express-session": "^1.17.4",
+    "@types/ioredis": "^4.28.5",
+    "@types/node": "^17.0.0",
+    "gen-env-types": "^1.3.0",
+    "nodemon": "^2.0.15",
+    "typescript": "^4.5.4"
+  }
+}
