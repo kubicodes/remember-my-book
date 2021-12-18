@@ -52,7 +52,7 @@ export class UserResolver {
           ],
         };
       }
-      
+
       return { errors: [{ message: "Internal Server Error" }] };
     }
   }
@@ -124,8 +124,22 @@ export class UserResolver {
     return { user: matchedUser };
   }
 
-  @Query(() => String)
-  hello(): string {
-    return "hello";
+  @Query(() => UserResponse)
+  async user(@Arg("id") id: number): Promise<UserResponse> {
+    if (id <= 0) {
+      return { errors: [{ message: "ID must be greater than 0" }] };
+    }
+
+    try {
+      const matchedUser = await User.findOne(id);
+
+      if (!matchedUser) {
+        return { errors: [{ message: `User with ID ${id} does not exist` }] };
+      }
+
+      return { user: matchedUser };
+    } catch (error) {
+      return { errors: [{ message: "Internal Server Error" }] };
+    }
   }
 }
