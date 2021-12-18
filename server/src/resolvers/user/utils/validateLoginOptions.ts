@@ -1,6 +1,7 @@
 import { validate } from "email-validator";
 import { FieldError } from "../../common_types/error_response/FieldError";
 import { LoginOptions } from "../types/LoginOptions";
+import { passwordRegex, usernameRegex } from "./constants";
 import { detectLoggedInBy } from "./detectLoggedInBy";
 
 export const validateLoginOptions = (
@@ -8,13 +9,8 @@ export const validateLoginOptions = (
 ): FieldError | boolean => {
   const loggedInBy = detectLoggedInBy(loginOptions);
 
-  const usernameValidationRegex = new RegExp(
-    "^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,10}[a-zA-Z0-9]$"
-  );
-
-  const passwordValidationRegex = new RegExp(
-    "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,16}$"
-  );
+  const usernameValidationRegex = new RegExp(usernameRegex);
+  const passwordValidationRegex = new RegExp(passwordRegex);
 
   if (loggedInBy === "email" && !validate(loginOptions.usernameOrEmail)) {
     return { field: "email", message: "Invalid E-Mail address" };

@@ -1,17 +1,13 @@
 import { validate } from "email-validator";
 import { FieldError } from "../../common_types/error_response/FieldError";
 import { RegisterOptions } from "../types/RegisterOptions";
+import { passwordRegex, usernameRegex } from "./constants";
 
 export const validateRegisterOptions = (
   registerOptions: RegisterOptions
 ): FieldError | boolean => {
-  const usernameValidationRegex = new RegExp(
-    "^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,10}[a-zA-Z0-9]$"
-  );
-
-  const passwordValidationRegex = new RegExp(
-    "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,16}$"
-  );
+  const usernameValidationRegex = new RegExp(usernameRegex);
+  const passwordValidationRegex = new RegExp(passwordRegex);
 
   if (!validate(registerOptions.email)) {
     return { field: "email", message: "Invalid E-Mail address" };
