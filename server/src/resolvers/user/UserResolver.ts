@@ -44,6 +44,15 @@ export class UserResolver {
 
       return { user: createdUser };
     } catch (error) {
+      //typeorm error message and code for duplicate entries
+      if (error.message === "ER_DUP_ENTRY" || error.errno === 1062) {
+        return {
+          errors: [
+            { message: "User with this E-Mail or username already exists" },
+          ],
+        };
+      }
+      
       return { errors: [{ message: "Internal Server Error" }] };
     }
   }
@@ -51,7 +60,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("loginOptions") loginOptions: LoginOptions,
-    @Ctx() { req, res, redis }: CustomContext
+    @Ctx() { req }: CustomContext
   ): Promise<UserResponse> {
     const validateLoginOptionsResult = validateLoginOptions(loginOptions);
 
@@ -100,7 +109,7 @@ export class UserResolver {
       );
     } catch (error) {
       return {
-        errors: [{ message: "Invalid Login Data" }],
+        errors: [{ message: "Internal Server Error" }],
       };
     }
 
@@ -112,7 +121,7 @@ export class UserResolver {
 
     req.session.userId = matchedUser.id;
 
-    return {user: matchedUser}
+    return { user: matchedUser };
   }
 
   @Query(() => String)
