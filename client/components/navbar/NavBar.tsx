@@ -1,18 +1,16 @@
 import React from "react";
-import { Navbar, Container, Nav } from "react-bootstrap";
-import NextLink from "next/link";
+import { Container, Nav, Navbar } from "react-bootstrap";
 
 const NavBar: React.FC<{}> = () => {
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
-        <Navbar.Brand href="/">Remember My Name</Navbar.Brand>
+        <Navbar.Brand href="/">Remember My Book</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav style={{ marginLeft: "auto" }}>
-            <NextLink href={"/login"}>
-              <Nav.Link href="/login">Login</Nav.Link>
-            </NextLink>
+            <Nav.Link href="/login">Login</Nav.Link>
+            <Nav.Link href="/register">Register</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
