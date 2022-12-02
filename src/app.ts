@@ -4,6 +4,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import booksRouter from "../src/modules/google-books/routes/google-books.route";
 import { getApplicationConfig } from "./shared/application-config/helpers/get-application-config.helper";
+import { logger } from "./shared/logger/logger";
 
 (async () => {
     const app = express();
@@ -22,6 +23,6 @@ import { getApplicationConfig } from "./shared/application-config/helpers/get-ap
     app.use("/books", booksRouter);
 
     app.listen(config.port, () => {
-        console.log(`App listening on port: ${config.port}`);
+        logger.info(`App listening on port: ${config.port}`);
     });
 })();

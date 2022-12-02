@@ -34,7 +34,7 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
             const {
                 data: { items, totalItems },
             } = await this.apiClient.get<GoogleBooksApiResponse>(`/volumes`, {
-                params: { q: query, startIndex: offset, maxResults: limit },
+                params: { q: query, startIndex, maxResults: limit },
             });
 
             totalItemsResponse = totalItems;
@@ -52,8 +52,6 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
         } while (totalItemsResponse === 0 || allFetchedItems.length < limit + offset);
 
         GoogleBooksFetchService.cache.set(query, allFetchedItems);
-        console.log("offset: ", offset);
-        console.log("ofset + limit: ", offset + limit);
 
         return { totalItems: allFetchedItems.length, items: allFetchedItems.slice(offset, limit + offset) };
     }
