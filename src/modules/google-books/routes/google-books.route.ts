@@ -1,8 +1,8 @@
 import express, { Router, Request, Response } from "express";
-import { getApplicationConfig } from "../../../shared/application-config/helpers/get-application-config.helper";
 import { logger } from "../../../shared/logger/logger";
 import { AjvSchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
 import googleBooksApiClient from "../api-clients/google-books.client";
+import { normalizeQuery } from "../helpers/normalize-query.helper";
 import { GoogleBooksResolver } from "../resolvers/google-books.resolver";
 import { GoogleBooksErrorResponse } from "../schema/google-books-error-response.schema";
 import { ResolvedGoogleBooksResponse } from "../schema/google-books.schema";
@@ -16,14 +16,15 @@ router.get(
         req: Request<{}, {}, {}, { query: string; limit?: string; offset?: string }>,
         res: Response<ResolvedGoogleBooksResponse | GoogleBooksErrorResponse>,
     ) => {
-        const applicationConfig = await getApplicationConfig();
-        const {
-            googleBooks: { queryLimit },
-        } = applicationConfig;
-
         const { query, limit, offset } = req.query;
-        const parsedLimit = limit ? parseInt(limit) : undefined;
-        const parsedOffset = offset ? parseInt(offset) : undefined;
+        const parsedLimit = limit ? parseInt(limit) : 20;
+        const parsedOffset = offset ? parseInt(offset) : 0;
+
+        if (parsedLimit > 20) {
+            res.status(500);
+            res.send({ message: "Max query limit is 20" });
+            return;
+        }
 
         if (!query || query === "") {
             res.status(500);
@@ -32,28 +33,12 @@ router.get(
             return;
         }
 
-        if (parsedLimit && parsedLimit > queryLimit) {
-            res.status(500);
-            res.send({ message: `Maximal fetch limit: ${queryLimit}` });
-
-            return;
-        }
-
-        if (parsedOffset && parsedLimit && parsedOffset + parsedLimit > queryLimit) {
-            res.status(500);
-            res.send({ message: `You can only fetch ${queryLimit} entries` });
-
-            return;
-        }
-
-        const schemaValidationService = new AjvSchemaValidationService();
-        const googleBooksFetchService = new GoogleBooksFetchService(schemaValidationService, googleBooksApiClient, applicationConfig, logger);
+        const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, logger);
         const googleBooksResolver = new GoogleBooksResolver();
 
         try {
             // TODO: Standardize query to avoid duplicates in cache
-            const googleBooksResponse = await googleBooksFetchService.fetch(query, parsedOffset, parsedLimit);
-            // TODO: Adjust resolver with new limit and stuff
+            const googleBooksResponse = await googleBooksFetchService.fetch(normalizeQuery(query), parsedOffset, parsedLimit);
             const resolvedResponse = googleBooksResolver.resolve(googleBooksResponse, parsedLimit, parsedOffset);
 
             res.send(resolvedResponse);

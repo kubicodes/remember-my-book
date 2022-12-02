@@ -1,16 +1,16 @@
 import { GoogleBooksApiResponse, GoogleBooksItem, ResolvedGoogleBooksResponse } from "../schema/google-books.schema";
 
 export interface IGoogleBooksResolver {
-    resolve(response: GoogleBooksApiResponse): ResolvedGoogleBooksResponse;
+    resolve(response: GoogleBooksApiResponse, limit: number, offset: number): ResolvedGoogleBooksResponse;
 }
 
 export class GoogleBooksResolver implements IGoogleBooksResolver {
-    public resolve(response: GoogleBooksApiResponse, limit?: number, offset?: number): ResolvedGoogleBooksResponse {
+    public resolve(response: GoogleBooksApiResponse, limit: number, offset: number): ResolvedGoogleBooksResponse {
         return {
             total: response.totalItems,
             count: response.items.length,
-            limit: limit ?? 20,
-            offset: offset ?? 0,
+            limit,
+            offset,
             items: response.items.map(
                 (item: GoogleBooksItem): GoogleBooksItem => ({
                     id: item.id,
