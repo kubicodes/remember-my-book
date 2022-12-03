@@ -1,2 +1,4 @@
 development:
   port: 8080
+  googleBooks:
+    baseUrl: TODO
