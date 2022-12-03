@@ -2,10 +2,11 @@ import { ErrorObject, ValidateFunction } from "ajv";
 import { AxiosInstance } from "axios";
 import { Logger } from "pino";
 import { SchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
-import { GoogleBooksApiResponse, GoogleBooksItem, GoogleBooksItemSchema } from "../schema/google-books.schema";
+import { GoogleBooksApiResponse, GoogleBooksItem, GoogleBooksItemSchema } from "../schemas/google-books.schema";
 
 export interface IGoogleBooksFetchService {
-    fetch(query: string, offset?: number, limit?: number): Promise<GoogleBooksApiResponse>;
+    fetch(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse>;
+    flushCache(): void;
 }
 
 export class GoogleBooksFetchService implements IGoogleBooksFetchService {
@@ -28,32 +29,44 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
             }
 
             allFetchedItems.push(...cachedItems);
+            // no need to fetch them again from google
+            startIndex = cachedItems.length;
         }
 
         do {
-            const {
-                data: { items, totalItems },
-            } = await this.apiClient.get<GoogleBooksApiResponse>(`/volumes`, {
-                params: { q: query, startIndex, maxResults: limit },
-            });
+            try {
+                const {
+                    data: { items, totalItems },
+                } = await this.apiClient.get<GoogleBooksApiResponse>(`/volumes`, {
+                    params: { q: query, startIndex, maxResults: limit },
+                });
 
-            totalItemsResponse = totalItems;
+                totalItemsResponse = totalItems;
 
-            for (const item of items) {
-                if (!this.isValid(item)) {
-                    this.logValidationErrors(this.schemaValidationFn.errors as ErrorObject[]);
-                    continue;
+                for (const item of items) {
+                    if (!this.isValid(item)) {
+                        this.logValidationErrors(this.schemaValidationFn.errors as ErrorObject[]);
+                        continue;
+                    }
+
+                    allFetchedItems.push(item);
                 }
 
-                allFetchedItems.push(item);
-            }
+                startIndex = startIndex + limit;
+            } catch (error) {
+                this.logger.error(JSON.stringify({ msg: "Error while fetching from Google Books API", err: error }));
 
-            startIndex = startIndex + limit;
+                return { totalItems: allFetchedItems.length, items: allFetchedItems.slice(offset, limit + offset) };
+            }
         } while (totalItemsResponse === 0 || allFetchedItems.length < limit + offset);
 
-        GoogleBooksFetchService.cache.set(query, allFetchedItems);
+        GoogleBooksFetchService.cache.set(query, [...new Set(allFetchedItems)]);
 
         return { totalItems: allFetchedItems.length, items: allFetchedItems.slice(offset, limit + offset) };
+    }
+
+    public flushCache(): void {
+        GoogleBooksFetchService.cache = new Map<string, GoogleBooksItem[]>();
     }
 
     private isValid(item: GoogleBooksItem): boolean {
@@ -63,7 +76,7 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
     private logValidationErrors(errors: ErrorObject[]): void {
         this.logger.error(
             JSON.stringify({
-                msg: "Google Books Api Response does not fit the schema. See Error for more.Skipping this fetch.",
+                msg: "Google Books Api Response does not fit the schema. See Error for more. Skipping this fetch.",
                 err: errors,
             }),
         );

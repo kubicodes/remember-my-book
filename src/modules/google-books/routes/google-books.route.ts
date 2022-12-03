@@ -4,8 +4,8 @@ import { AjvSchemaValidationService } from "../../../shared/schema-validation/sc
 import googleBooksApiClient from "../api-clients/google-books.client";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
 import { GoogleBooksResolver } from "../resolvers/google-books.resolver";
-import { GoogleBooksErrorResponse } from "../schema/google-books-error-response.schema";
-import { ResolvedGoogleBooksResponse } from "../schema/google-books.schema";
+import { GoogleBooksErrorResponse } from "../schemas/google-books-error-response.schema";
+import { ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
 import { GoogleBooksFetchService } from "../services/google-books-fetch.service";
 
 const router: Router = express.Router();
