@@ -7,21 +7,26 @@ import { getApplicationConfig } from "./shared/application-config/helpers/get-ap
 import { logger } from "./shared/logger/logger";
 
 (async () => {
+    // Initialising express server
     const app = express();
 
+    // Loading and validating config
     const config: ApplicationConfig = await getApplicationConfig();
     const schemaValidationService = new AjvSchemaValidationService<ApplicationConfig>();
     const validate = schemaValidationService.getValidationFunction(ApplicationConfigSchema);
 
     if (!validate(config)) {
-        console.error(JSON.stringify(validate.errors));
+        logger.error(JSON.stringify(validate.errors));
         throw new Error("Invalid App config");
     }
 
+    // Middleware
     app.use(bodyParser.json());
 
+    // Routes
     app.use("/books", booksRouter);
 
+    // Starting Server
     app.listen(config.port, () => {
         logger.info(`App listening on port: ${config.port}`);
     });
