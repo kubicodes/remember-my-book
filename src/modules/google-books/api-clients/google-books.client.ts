@@ -1,7 +1,20 @@
+import { AxiosInstance } from "axios";
 import { ApiClientBuilderService } from "../../../shared/api-client-builder/api-client-builder.service";
+import { ApplicationConfig } from "../../../shared/application-config/application-config.schema";
+import { getApplicationConfig } from "../../../shared/application-config/helpers/get-application-config.helper";
 import { logger } from "../../../shared/logger/logger";
 
-export const GOOGLE_BOOKS_API_BASE_URL = "https://www.googleapis.com/books/v1";
 const apiClientBuilder = new ApiClientBuilderService(logger);
+let apiClient: AxiosInstance = {} as AxiosInstance;
 
-export default apiClientBuilder.buildApiClient({ baseUrl: GOOGLE_BOOKS_API_BASE_URL });
+getApplicationConfig()
+    .then((appConfig: ApplicationConfig) => {
+        apiClient = apiClientBuilder.buildApiClient({ baseUrl: appConfig.googleBooks.baseUrl });
+    })
+    .catch((error) => {
+        logger.error(JSON.stringify({ msg: "Error while laoding application Config at Api Client Creation for Google Books.", err: error }));
+
+        throw new Error("Error while loading Application Config");
+    });
+
+export default apiClient;
