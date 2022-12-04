@@ -73,7 +73,7 @@ describe("Google Books Fetch Service", () => {
 
             await googleBooksFetchService.fetch(query, 0, 4);
 
-            // expect(mockApiClient.get).toHaveBeenCalledTimes(2);
+            expect(mockApiClient.get).toHaveBeenCalledTimes(2);
             expect(mockApiClient.get).toHaveBeenNthCalledWith(2, "/volumes", { params: { q: "test", startIndex: 2, maxResults: 4 } });
         });
 
