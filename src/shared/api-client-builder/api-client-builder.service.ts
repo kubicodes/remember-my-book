@@ -15,6 +15,10 @@ export class ApiClientBuilderService implements IApiClientBuilderService {
     public buildApiClient(options: ApiClientOptions): AxiosInstance {
         const client = axios.create({
             baseURL: options.baseUrl,
+            headers: {
+                Accept: "application/json",
+                "Accept-Encoding": "application/json",
+            },
         });
 
         client.interceptors.request.use((request) => {

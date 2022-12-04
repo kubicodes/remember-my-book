@@ -11,7 +11,7 @@ import { logger } from "./shared/logger/logger";
     const app = express();
 
     // Loading and validating config
-    const config: ApplicationConfig = await getApplicationConfig();
+    const config: ApplicationConfig = getApplicationConfig();
     const schemaValidationService = new AjvSchemaValidationService<ApplicationConfig>();
     const validate = schemaValidationService.getValidationFunction(ApplicationConfigSchema);
 

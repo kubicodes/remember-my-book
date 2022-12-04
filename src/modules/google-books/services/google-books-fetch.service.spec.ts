@@ -1,5 +1,6 @@
 import { ValidateFunction } from "ajv";
 import { AxiosInstance } from "axios";
+import Redis from "ioredis";
 import { mock, mockFn, mockReset } from "jest-mock-extended";
 import { Logger } from "pino";
 import { SchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
@@ -12,16 +13,17 @@ describe("Google Books Fetch Service", () => {
     const mockApiClient = mock<AxiosInstance>();
     const mockLogger = mock<Logger>();
     const mockValidateFn = mockFn<ValidateFunction>();
+    const mockRedis = mock<Redis>();
 
     beforeEach(() => {
         mockReset(mockValidateFn);
         mockReset(mockSchemaValidationService);
         mockReset(mockApiClient);
         mockReset(mockLogger);
+        mockReset(mockRedis);
         mockSchemaValidationService.getValidationFunction.mockReturnValueOnce(mockValidateFn);
 
-        googleBooksFetchService = new GoogleBooksFetchService(mockSchemaValidationService, mockApiClient, mockLogger);
-        googleBooksFetchService.flushCache();
+        googleBooksFetchService = new GoogleBooksFetchService(mockSchemaValidationService, mockApiClient, mockRedis, mockLogger);
     });
 
     describe("fetch", () => {
@@ -31,6 +33,9 @@ describe("Google Books Fetch Service", () => {
             mockValidateFn.mockReturnValueOnce(true);
 
             await googleBooksFetchService.fetch(query, 0, 1);
+
+            mockRedis.get.mockResolvedValueOnce(JSON.stringify([{ id: "id" }]));
+
             await googleBooksFetchService.fetch(query, 0, 1);
 
             expect(mockApiClient.get).toHaveBeenCalledTimes(1);
@@ -64,10 +69,11 @@ describe("Google Books Fetch Service", () => {
             mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 2, items: [{ id: "id-3" }, { id: "id-4" }] } });
             mockValidateFn.mockReturnValueOnce(true);
             mockValidateFn.mockReturnValueOnce(true);
+            mockRedis.get.mockResolvedValueOnce(JSON.stringify([{ id: "id-1" }, { id: "id-2" }]));
 
             await googleBooksFetchService.fetch(query, 0, 4);
 
-            expect(mockApiClient.get).toHaveBeenCalledTimes(2);
+            // expect(mockApiClient.get).toHaveBeenCalledTimes(2);
             expect(mockApiClient.get).toHaveBeenNthCalledWith(2, "/volumes", { params: { q: "test", startIndex: 2, maxResults: 4 } });
         });
 
