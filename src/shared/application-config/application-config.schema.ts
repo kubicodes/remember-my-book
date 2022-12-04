@@ -5,6 +5,11 @@ export const ApplicationConfigSchema = Type.Object({
     googleBooks: Type.Object({
         baseUrl: Type.String(),
     }),
+    redis: Type.Object({
+        host: Type.String(),
+        port: Type.Number(),
+        password: Type.String(),
+    }),
 });
 
 export type ApplicationConfig = Static<typeof ApplicationConfigSchema>;
