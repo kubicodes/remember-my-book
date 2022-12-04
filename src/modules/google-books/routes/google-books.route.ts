@@ -1,5 +1,7 @@
 import express, { Router, Request, Response } from "express";
+import { getApplicationConfig } from "../../../shared/application-config/helpers/get-application-config.helper";
 import { logger } from "../../../shared/logger/logger";
+import { getRedisClientSingleton } from "../../../shared/redis-client/get-redis-client";
 import { AjvSchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
 import googleBooksApiClient from "../api-clients/google-books.client";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
@@ -33,7 +35,10 @@ router.get(
             return;
         }
 
-        const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, logger);
+        const { redis: redisConfig } = getApplicationConfig();
+        const redis = getRedisClientSingleton(redisConfig);
+
+        const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, redis, logger);
         const googleBooksResolver = new GoogleBooksResolver();
 
         try {

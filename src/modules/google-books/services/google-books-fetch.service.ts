@@ -1,19 +1,23 @@
 import { ErrorObject, ValidateFunction } from "ajv";
 import { AxiosInstance } from "axios";
+import Redis from "ioredis";
 import { Logger } from "pino";
 import { SchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
 import { GoogleBooksApiResponse, GoogleBooksItem, GoogleBooksItemSchema } from "../schemas/google-books.schema";
 
 export interface IGoogleBooksFetchService {
     fetch(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse>;
-    flushCache(): void;
 }
 
 export class GoogleBooksFetchService implements IGoogleBooksFetchService {
     private schemaValidationFn: ValidateFunction;
-    private static cache: Map<string, GoogleBooksItem[]> = new Map();
 
-    constructor(private schemaValidationService: SchemaValidationService, private apiClient: AxiosInstance, private logger: Logger) {
+    constructor(
+        private schemaValidationService: SchemaValidationService,
+        private apiClient: AxiosInstance,
+        private redisClient: Redis,
+        private logger: Logger,
+    ) {
         this.schemaValidationFn = this.schemaValidationService.getValidationFunction(GoogleBooksItemSchema);
     }
 
@@ -22,7 +26,9 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
         let startIndex = offset;
         const allFetchedItems: GoogleBooksItem[] = [];
 
-        const cachedItems = GoogleBooksFetchService.cache.get(query);
+        const redisCachedData = await this.redisClient.get(query);
+        const cachedItems = redisCachedData ? (JSON.parse(redisCachedData) as GoogleBooksItem[]) : undefined;
+
         if (cachedItems) {
             if (cachedItems.length >= limit) {
                 return { totalItems: cachedItems.length, items: cachedItems.slice(offset, offset + limit) };
@@ -54,19 +60,15 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
 
                 startIndex = startIndex + limit;
             } catch (error) {
-                this.logger.error(JSON.stringify({ msg: "Error while fetching from Google Books API", err: error }));
+                this.logger.error(JSON.stringify({ msg: "Error while fetching from Google Books API", err: (error as Error)?.message }));
 
                 return { totalItems: allFetchedItems.length, items: allFetchedItems.slice(offset, limit + offset) };
             }
         } while (totalItemsResponse === 0 || allFetchedItems.length < limit + offset);
 
-        GoogleBooksFetchService.cache.set(query, [...new Set(allFetchedItems)]);
+        await this.redisClient.set(query, JSON.stringify([...new Set(allFetchedItems)]));
 
         return { totalItems: allFetchedItems.length, items: allFetchedItems.slice(offset, limit + offset) };
-    }
-
-    public flushCache(): void {
-        GoogleBooksFetchService.cache = new Map<string, GoogleBooksItem[]>();
     }
 
     private isValid(item: GoogleBooksItem): boolean {
