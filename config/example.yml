@@ -1,4 +1,8 @@
 development:
-  port: 8080
+  port: TODO
   googleBooks:
     baseUrl: TODO
+  redis:
+    host: TODO
+    port: TODO
+    password: TODO

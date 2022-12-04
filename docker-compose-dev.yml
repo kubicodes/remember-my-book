@@ -1,8 +1,17 @@
-version: "1"
-
+version: "3"
 services:
-  app:
-    container_name: app-dev
+  redis:
+    container_name: redis
+    image: redis:7.0.5-alpine3.17
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data # persistance
+    networks:
+      - webnet
+    command: redis-server --requirepass ${REDIS_PASSWORD} --loglevel warning
+  api:
+    container_name: api-dev
     build:
       context: . # Take dockerfile from root
       target: builder # Stop after builder
@@ -12,3 +21,12 @@ services:
     ports:
       - 8080:8080 # left side needs to match with that what's in development.yml
     command: npm run start:dev # override npm run build from Dockerfile
+    networks:
+      - webnet
+    depends_on:
+      - redis
+volumes:
+  redis:
+    driver: local
+networks:
+  webnet:
