@@ -2,6 +2,8 @@ FROM node:18-alpine as builder
 
 WORKDIR /usr/src/app
 
+RUN apk add libressl-dev && apk add openssl
+
 COPY package*.json .
 
 # Install dev dependencies as well for now
@@ -13,6 +15,8 @@ RUN npm run build
 
 # Production Container
 FROM node:18-alpine as production
+
+RUN apk add libressl-dev && apk add openssl
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
