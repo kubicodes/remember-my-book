@@ -39,7 +39,6 @@ services:
     depends_on:
       - redis
       - postgres
-
 volumes:
   redis:
     driver: local
