@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 RUN apt-get update && apt-get install -y openssl libssl-dev
 
 COPY package*.json .
+COPY prisma .
 
 # Install dev dependencies as well for now
 RUN npm install
