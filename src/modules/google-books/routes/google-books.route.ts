@@ -10,12 +10,18 @@ import { GoogleBooksErrorResponse } from "../schemas/google-books-error-response
 import { ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
 import { GoogleBooksFetchService } from "../services/google-books-fetch.service";
 
+interface RequestQuery {
+    query: string;
+    limit?: string;
+    offset?: string;
+}
+
 const router: Router = express.Router();
 
 router.get(
     "/",
     async (
-        req: Request<{}, {}, {}, { query: string; limit?: string; offset?: string }>,
+        req: Request<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, RequestQuery>,
         res: Response<ResolvedGoogleBooksResponse | GoogleBooksErrorResponse>,
     ) => {
         const { query, limit, offset } = req.query;
