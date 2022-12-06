@@ -1,6 +1,8 @@
-FROM node:18-alpine as builder
+FROM node:18-bullseye-slim as builder
 
 WORKDIR /usr/src/app
+
+RUN apt-get update && apt-get install -y openssl libssl-dev
 
 COPY package*.json .
 
@@ -12,7 +14,9 @@ COPY . .
 RUN npm run build
 
 # Production Container
-FROM node:18-alpine as production
+FROM  node:18-bullseye-slim as production
+
+RUN apt-get update && apt-get install -y openssl libssl-dev
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
