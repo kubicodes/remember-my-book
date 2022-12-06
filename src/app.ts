@@ -6,7 +6,7 @@ import booksRouter from "../src/modules/google-books/routes/google-books.route";
 import { getApplicationConfig } from "./shared/application-config/helpers/get-application-config.helper";
 import { logger } from "./shared/logger/logger";
 
-(async () => {
+(async (): Promise<void> => {
     // Initialising express server
     const app = express();
 

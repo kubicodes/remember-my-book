@@ -20,7 +20,6 @@ module.exports = {
         "no-unused-vars": "off",
         "no-empty": "off",
         "@typescript-eslint/explicit-function-return-type": "error",
-        // "@typescript-eslint/indent": ["error", 4],
         "max-len": [
             "error",
             {
@@ -28,7 +27,7 @@ module.exports = {
                 ignoreComments: true,
                 ignoreTrailingComments: true,
                 ignoreUrls: true,
-                ignoreString: true,
+                ignoreStrings: true,
             },
         ],
     },
