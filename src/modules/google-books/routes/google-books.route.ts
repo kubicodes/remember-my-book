@@ -3,10 +3,10 @@ import { getApplicationConfig } from "../../../shared/application-config/helpers
 import { logger } from "../../../shared/logger/logger";
 import { getRedisClientSingleton } from "../../../shared/redis-client/get-redis-client";
 import { AjvSchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
+import { ErrorResponse } from "../../../shared/schema/error-api-response.schema";
 import googleBooksApiClient from "../api-clients/google-books.client";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
 import { GoogleBooksResolver } from "../resolvers/google-books.resolver";
-import { GoogleBooksErrorResponse } from "../schemas/google-books-error-response.schema";
 import { ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
 import { GoogleBooksFetchService } from "../services/google-books-fetch.service";
 
@@ -18,50 +18,44 @@ interface RequestQuery {
 
 const router: Router = express.Router();
 
-router.get(
-    "/",
-    async (
-        req: Request<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, RequestQuery>,
-        res: Response<ResolvedGoogleBooksResponse | GoogleBooksErrorResponse>,
-    ) => {
-        const { query, limit, offset } = req.query;
-        const parsedLimit = limit ? parseInt(limit) : 20;
-        const parsedOffset = offset ? parseInt(offset) : 0;
+router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, res: Response<ResolvedGoogleBooksResponse | ErrorResponse>) => {
+    const { query, limit, offset } = req.query;
+    const parsedLimit = limit ? parseInt(limit) : 20;
+    const parsedOffset = offset ? parseInt(offset) : 0;
 
-        if (parsedLimit > 20) {
-            res.status(500);
-            res.send({ message: "Max query limit is 20" });
-            return;
-        }
+    if (parsedLimit > 20) {
+        res.status(500);
+        res.send({ message: "Max query limit is 20" });
+        return;
+    }
 
-        if (!query || query === "") {
-            res.status(500);
-            res.send({ message: "Query param needs to be specified!" });
+    if (!query || query === "") {
+        res.status(500);
+        res.send({ message: "Query param needs to be specified!" });
 
-            return;
-        }
+        return;
+    }
 
-        const { redis: redisConfig } = getApplicationConfig();
-        const redis = getRedisClientSingleton(redisConfig);
+    const { redis: redisConfig } = getApplicationConfig();
+    const redis = getRedisClientSingleton(redisConfig);
 
-        const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, redis, logger);
-        const googleBooksResolver = new GoogleBooksResolver();
+    const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, redis, logger);
+    const googleBooksResolver = new GoogleBooksResolver();
 
-        try {
-            // TODO: Standardize query to avoid duplicates in cache
-            const googleBooksResponse = await googleBooksFetchService.fetch(normalizeQuery(query), parsedOffset, parsedLimit);
-            const resolvedResponse = googleBooksResolver.resolve(googleBooksResponse, parsedLimit, parsedOffset);
+    try {
+        // TODO: Standardize query to avoid duplicates in cache
+        const googleBooksResponse = await googleBooksFetchService.fetch(normalizeQuery(query), parsedOffset, parsedLimit);
+        const resolvedResponse = googleBooksResolver.resolve(googleBooksResponse, parsedLimit, parsedOffset);
 
-            res.send(resolvedResponse);
+        res.send(resolvedResponse);
 
-            return;
-        } catch (err) {
-            logger.error(JSON.stringify({ msg: "Sending 500 in /books route. See error for more details.", error: err }));
+        return;
+    } catch (err) {
+        logger.error(JSON.stringify({ msg: "Sending 500 in /books route. See error for more details.", error: err }));
 
-            res.status(500);
-            res.send({ message: "Internal Error. Please try again later" });
-        }
-    },
-);
+        res.status(500);
+        res.send({ message: "Internal Error. Please try again later" });
+    }
+});
 
 export default router;

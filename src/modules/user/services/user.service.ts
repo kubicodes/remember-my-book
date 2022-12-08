@@ -4,6 +4,7 @@ import { isUsernameValid } from "../helpers/user-validation.helper";
 import { BCRYPT_SALT_ROUNDS } from "../../../shared/constants/constants";
 import { PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE } from "../../database/constants/database.constants";
 import { IPasswordService } from "../../auth/password.service";
+import { UserAlreadyExistsError } from "../schemas/custom-errors.schema";
 
 export interface UserCreateOptions {
     username: string;
@@ -35,12 +36,12 @@ export class UserService implements IUserService {
 
             return await this.dbClient.user.create({ data: { username, password: hashedPassword } });
         } catch (error) {
-            this.logger.error(JSON.stringify({ message: `Error while creating user ${username}`, err: error }));
+            this.logger.error({ message: `Error while creating user ${username}`, err: (error as Error).message });
 
             // This could be every unique constraint error. But for now we only have this on the username
             // So the check is fine for now but might need to be adjusted in future cases
             if (error.code === PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE) {
-                throw new Error(`User ${username} already exists`);
+                throw new UserAlreadyExistsError(`User ${username} already exists`);
             }
 
             throw error;

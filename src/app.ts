@@ -3,6 +3,7 @@ import { AjvSchemaValidationService } from "./shared/schema-validation/schema-va
 import express from "express";
 import bodyParser from "body-parser";
 import booksRouter from "../src/modules/google-books/routes/google-books.route";
+import userRouter from "../src/modules/user/routes/user.route";
 import { getApplicationConfig } from "./shared/application-config/helpers/get-application-config.helper";
 import { logger } from "./shared/logger/logger";
 
@@ -25,6 +26,7 @@ import { logger } from "./shared/logger/logger";
 
     // Routes
     app.use("/books", booksRouter);
+    app.use("/user", userRouter);
 
     // Starting Server
     app.listen(config.port, () => {
