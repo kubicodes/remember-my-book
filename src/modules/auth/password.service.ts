@@ -13,7 +13,7 @@ export class PasswordService implements IPasswordService {
 
     public async hashPassword(password: string, salt: number): Promise<string> {
         try {
-            return hash(password, salt);
+            return await hash(password, salt);
         } catch (error) {
             this.logger.error({ msg: "Error while hashing password" });
 
