@@ -15,7 +15,7 @@ export class PasswordService implements IPasswordService {
         try {
             return hash(password, salt);
         } catch (error) {
-            this.logger.error(JSON.stringify({ msg: "Error while hashing password" }));
+            this.logger.error({ msg: "Error while hashing password" });
 
             throw new Error("Internal Error while hashing Password");
         }
