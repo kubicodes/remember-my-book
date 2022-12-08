@@ -1,9 +1,9 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Logger } from "pino";
-import { isPasswordValid, isUsernameValid } from "../helpers/user-validation.helper";
-import bcrypt from "bcrypt";
+import { isUsernameValid } from "../helpers/user-validation.helper";
 import { BCRYPT_SALT_ROUNDS } from "../../../shared/constants/constants";
 import { PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE } from "../../database/constants/database.constants";
+import { IPasswordService } from "../../auth/password.service";
 
 export interface UserCreateOptions {
     username: string;
@@ -15,7 +15,7 @@ export interface IUserService {
 }
 
 export class UserService implements IUserService {
-    constructor(private dbClient: PrismaClient, private logger: Logger) {}
+    constructor(private dbClient: PrismaClient, private passwordService: IPasswordService, private logger: Logger) {}
 
     public async create(options: UserCreateOptions): Promise<User> {
         const { username, password } = options;
@@ -25,13 +25,13 @@ export class UserService implements IUserService {
             throw new Error("Username does not match the requirements.");
         }
 
-        const isValidPassword = isPasswordValid(password);
+        const isValidPassword = this.passwordService.isValidPassword(password);
         if (!isValidPassword) {
             throw new Error("Password does not matche the requirements.");
         }
 
         try {
-            const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+            const hashedPassword = await this.passwordService.hashPassword(password, BCRYPT_SALT_ROUNDS);
 
             return await this.dbClient.user.create({ data: { username, password: hashedPassword } });
         } catch (error) {
