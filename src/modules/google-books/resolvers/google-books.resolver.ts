@@ -7,7 +7,6 @@ export interface IGoogleBooksResolver {
 export class GoogleBooksResolver implements IGoogleBooksResolver {
     public resolve(response: GoogleBooksApiResponse, limit: number, offset: number): ResolvedGoogleBooksResponse {
         return {
-            total: response.totalItems,
             count: response.items.length,
             limit,
             offset,

@@ -29,7 +29,6 @@ export const GoogleBooksApiResponseSchema = Type.Object({
 export type GoogleBooksApiResponse = Static<typeof GoogleBooksApiResponseSchema>;
 
 export const ResolvedGoogleBooksResponseSchema = Type.Object({
-    total: Type.Number(),
     count: Type.Number(),
     limit: Type.Number(),
     offset: Type.Number(),
