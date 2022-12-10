@@ -48,7 +48,7 @@ describe("Google Books Fetch Service", () => {
             mockValidateFn.mockReturnValueOnce(true);
             mockValidateFn.errors = [{ instancePath: "instancePath", keyword: "keyword", params: { param: "param" }, schemaPath: "schemPath" }];
 
-            const result = await googleBooksFetchService.fetch(query, 0, 1);
+            const result = await googleBooksFetchService.fetch(query, 0, 2);
 
             expect(mockLogger.error).toHaveBeenCalledTimes(1);
             expect(result.totalItems).toBe(1);
@@ -56,39 +56,16 @@ describe("Google Books Fetch Service", () => {
             expect(result.items[0].id).toBe("id-valid");
         });
 
-        it("calls the google books api when the cache does not have enough items", async () => {
+        it("returns the items without any errors", async () => {
             const query = "test";
 
             mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 2, items: [{ id: "id-1" }, { id: "id-2" }] } });
             mockValidateFn.mockReturnValueOnce(true);
             mockValidateFn.mockReturnValueOnce(true);
 
-            // 2 items in cache now
-            await googleBooksFetchService.fetch(query, 0, 2);
-
-            mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 2, items: [{ id: "id-3" }, { id: "id-4" }] } });
-            mockValidateFn.mockReturnValueOnce(true);
-            mockValidateFn.mockReturnValueOnce(true);
-            mockRedis.get.mockResolvedValueOnce(JSON.stringify([{ id: "id-1" }, { id: "id-2" }]));
-
-            await googleBooksFetchService.fetch(query, 0, 4);
-
-            expect(mockApiClient.get).toHaveBeenCalledTimes(2);
-            expect(mockApiClient.get).toHaveBeenNthCalledWith(2, "/volumes", { params: { q: "test", startIndex: 2, maxResults: 4 } });
-        });
-
-        it("returns the items without any errors", async () => {
-            const query = "test";
-
-            mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 1, items: [{ id: "id-1" }] } });
-            mockValidateFn.mockReturnValueOnce(true);
-
-            mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 1, items: [{ id: "id-2" }] } });
-            mockValidateFn.mockReturnValueOnce(true);
-
             const result = await googleBooksFetchService.fetch(query, 0, 2);
 
-            expect(mockApiClient.get).toHaveBeenCalledTimes(2);
+            expect(mockApiClient.get).toHaveBeenCalledTimes(1);
             expect(result.totalItems).toBe(2);
             expect(result.items.length).toBe(2);
             expect(result.items[0].id).toBe("id-1");

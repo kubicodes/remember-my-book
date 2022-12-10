@@ -14,7 +14,6 @@ describe("Google Books Resolver", () => {
             const result = googleBooksResolver.resolve(response, 1, 0);
 
             expect(result.count).toBe(1);
-            expect(result.total).toBe(1);
             expect(result.limit).toBe(1);
             expect(result.offset).toBe(0);
         });
@@ -61,7 +60,6 @@ describe("Google Books Resolver", () => {
             const result = googleBooksResolver.resolve(response, 1, 0);
 
             expect(result).toEqual({
-                total: 1,
                 count: 1,
                 limit: 1,
                 offset: 0,
