@@ -36,11 +36,12 @@ export class UserService implements IUserService {
 
             return await this.dbClient.user.create({ data: { username, password: hashedPassword } });
         } catch (error) {
-            this.logger.error({ message: `Error while creating user ${username}`, err: (error as Error).message });
+            this.logger.error({ msg: `Error while creating user ${username}` });
 
             // This could be every unique constraint error. But for now we only have this on the username
             // So the check is fine for now but might need to be adjusted in future cases
             if (error.code === PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE) {
+                this.logger.error({ msg: `User ${username} already exists` });
                 throw new UserAlreadyExistsError(`User ${username} already exists`);
             }
 
