@@ -71,7 +71,7 @@ describe("User Service", () => {
             });
 
             await expect(() => userService.create({ username: validUsername, password: validPassword })).rejects.toThrowError();
-            expect(mockLogger.error).toHaveBeenCalledWith(JSON.stringify({ message: `Error while creating user ${validUsername}`, err: {} }));
+            expect(mockLogger.error).toHaveBeenCalledWith({ msg: `Error while creating user ${validUsername}` });
         });
 
         it("throws a customized error when username already exists", async () => {
@@ -96,12 +96,13 @@ describe("User Service", () => {
                 `User ${alreadyExistingUsername} already exists`,
             );
 
-            expect(mockLogger.error).toHaveBeenCalledWith(
-                JSON.stringify({
-                    message: `Error while creating user ${alreadyExistingUsername}`,
-                    err: { code: PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE },
-                }),
-            );
+            expect(mockLogger.error).toHaveBeenNthCalledWith(1, {
+                msg: `Error while creating user ${alreadyExistingUsername}`,
+            });
+
+            expect(mockLogger.error).toHaveBeenNthCalledWith(2, {
+                msg: `User ${alreadyExistingUsername} already exists`,
+            });
         });
     });
 });
