@@ -1,7 +1,7 @@
 import { ApplicationConfig } from "../application-config.schema";
 
 interface Options {
-    port?: 8000;
+    port?: number;
     redis?: {
         host?: string;
         port?: number;
