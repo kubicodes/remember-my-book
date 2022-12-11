@@ -105,4 +105,38 @@ describe("User Service", () => {
             });
         });
     });
+
+    describe("findById", () => {
+        it("returns the matching user", async () => {
+            const mockUser = {
+                id: "id",
+                username: "username",
+                password: "hashed-password",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            jest.spyOn(mockDbClient.user, "findUnique").mockResolvedValueOnce(mockUser);
+
+            const matchingUser = await userService.findById("id");
+
+            expect(matchingUser).toMatchObject(mockUser);
+        });
+
+        it("throws and logs an error when no user matches the ID", async () => {
+            jest.spyOn(mockDbClient.user, "findUnique").mockResolvedValueOnce(null);
+
+            await expect(() => userService.findById("id")).rejects.toThrowError("User with ID id does not exist");
+            expect(mockLogger.error).toHaveBeenCalledWith({ msg: "User with ID id does not exist" });
+        });
+
+        it("throws and logs an error when the method fails at all", async () => {
+            jest.spyOn(mockDbClient.user, "findUnique").mockImplementationOnce(() => {
+                throw new Error("Some Error");
+            });
+
+            await expect(() => userService.findById("id")).rejects.toThrowError("Some Error");
+            expect(mockLogger.error).toHaveBeenCalledWith({ msg: "Error in findByID method in UserService. User ID: id", err: "Some Error" });
+        });
+    });
 });

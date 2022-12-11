@@ -4,7 +4,7 @@ import { isUsernameValid } from "../helpers/user-validation.helper";
 import { BCRYPT_SALT_ROUNDS } from "../../../shared/constants/constants";
 import { PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE } from "../../database/constants/database.constants";
 import { IPasswordService } from "../../auth/password.service";
-import { UserAlreadyExistsError } from "../schemas/custom-errors.schema";
+import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 
 export interface UserCreateOptions {
     username: string;
@@ -13,6 +13,7 @@ export interface UserCreateOptions {
 
 export interface IUserService {
     create(options: UserCreateOptions): Promise<User>;
+    findById(id: string): Promise<User>;
 }
 
 export class UserService implements IUserService {
@@ -45,6 +46,26 @@ export class UserService implements IUserService {
                 throw new UserAlreadyExistsError(`User ${username} already exists`);
             }
 
+            throw error;
+        }
+    }
+
+    public async findById(id: string): Promise<User> {
+        try {
+            const matchingUser = await this.dbClient.user.findUnique({ where: { id } });
+
+            if (matchingUser === null) {
+                throw new UserNotFoundError(`User with ID ${id} does not exist`);
+            }
+
+            return matchingUser;
+        } catch (error) {
+            if (error instanceof UserNotFoundError) {
+                this.logger.error({ msg: `User with ID ${id} does not exist` });
+                throw error;
+            }
+
+            this.logger.error({ msg: `Error in findByID method in UserService. User ID: ${id}`, err: error?.message });
             throw error;
         }
     }
