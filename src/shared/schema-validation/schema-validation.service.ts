@@ -5,9 +5,13 @@ export interface SchemaValidationService {
 }
 
 export class AjvSchemaValidationService<T> implements SchemaValidationService {
-    public getValidationFunction(schema: Schema): ValidateFunction {
-        const ajv = new Ajv();
+    private ajvSingleton: Ajv;
 
-        return ajv.compile<T>(schema);
+    public getValidationFunction(schema: Schema): ValidateFunction {
+        if (!this.ajvSingleton) {
+            this.ajvSingleton = new Ajv();
+        }
+
+        return this.ajvSingleton.compile<T>(schema);
     }
 }

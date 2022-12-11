@@ -1,6 +1,8 @@
 import { hash } from "bcrypt";
 import { Logger } from "pino";
 
+export const name = "PasswordService";
+
 export interface IPasswordService {
     hashPassword(password: string, salt: number): Promise<string>;
     isValidPassword(password: string): boolean;
