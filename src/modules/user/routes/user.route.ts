@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
-import { Factory } from "../../factory";
+import { Factory } from "../../factory/services/factory.service";
 import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
 
