@@ -1,10 +1,11 @@
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
-import { ErrorResponse } from "../../../shared/schema/error-api-response.schema";
+import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
 import { PasswordService } from "../../auth/password.service";
 import { PrismaDBClient } from "../../database/services/database-client.service";
 import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
+import { UserBooksService } from "../services/user-books.service";
 import { UserService } from "../services/user.service";
 
 interface CreateUserRequestBody {
@@ -16,9 +17,17 @@ interface FindUserByIdRequestParams {
     id: string;
 }
 
+interface UserBooksRequestParams {
+    id: string;
+}
+
+interface UserBooksRequestBody {
+    bookId: string;
+}
+
 const router: Router = express.Router();
 
-router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, res: Response<UserApiResponse | ErrorResponse>) => {
+router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, res: Response<UserApiResponse | GenericApiResponse>) => {
     logger.debug("POST Request coming into /user");
 
     const dbClient = PrismaDBClient.getInstance();
@@ -48,7 +57,7 @@ router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, r
     }
 });
 
-router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response<UserApiResponse | ErrorResponse>) => {
+router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response<UserApiResponse | GenericApiResponse>) => {
     const id = req.params.id;
 
     logger.debug(`GET Request coming into /user/${id}`);
@@ -73,6 +82,24 @@ router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response
         res.send({
             message: errorMessage,
         });
+    }
+});
+
+router.post("/:id/books", async (req: Request<UserBooksRequestParams, unknown, UserBooksRequestBody>, res: Response<GenericApiResponse>) => {
+    const { id: userId } = req.params;
+    const { bookId } = req.body;
+
+    const dbClient = PrismaDBClient.getInstance();
+    const userBooksService = new UserBooksService(dbClient, logger);
+
+    try {
+        await userBooksService.addBookToUser(userId, bookId);
+
+        res.status(200);
+        res.send({ message: `Successfully added bookId: ${bookId} to user ${userId}` });
+    } catch (error) {
+        res.status(500);
+        res.send({ message: (error as Error).message });
     }
 });
 

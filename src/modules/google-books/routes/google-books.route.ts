@@ -3,7 +3,7 @@ import { getApplicationConfig } from "../../../shared/application-config/helpers
 import { logger } from "../../../shared/logger/logger";
 import { getRedisClientSingleton } from "../../../shared/redis-client/get-redis-client";
 import { AjvSchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
-import { ErrorResponse } from "../../../shared/schema/error-api-response.schema";
+import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
 import googleBooksApiClient from "../api-clients/google-books.client";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
 import { GoogleBooksResolver } from "../resolvers/google-books.resolver";
@@ -18,7 +18,7 @@ interface RequestQuery {
 
 const router: Router = express.Router();
 
-router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, res: Response<ResolvedGoogleBooksResponse | ErrorResponse>) => {
+router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, res: Response<ResolvedGoogleBooksResponse | GenericApiResponse>) => {
     const { query, limit, offset } = req.query;
     const parsedLimit = limit ? parseInt(limit) : 20;
     const parsedOffset = offset ? parseInt(offset) : 0;
