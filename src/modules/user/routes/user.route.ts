@@ -1,12 +1,9 @@
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
-import { PasswordService } from "../../auth/password.service";
-import { PrismaDBClient } from "../../database/services/database-client.service";
+import { Factory } from "../../factory/services/factory.service";
 import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
-import { UserBooksService } from "../services/user-books.service";
-import { UserService } from "../services/user.service";
 
 interface CreateUserRequestBody {
     username: string;
@@ -30,11 +27,8 @@ const router: Router = express.Router();
 router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, res: Response<UserApiResponse | GenericApiResponse>) => {
     logger.debug("POST Request coming into /user");
 
-    const dbClient = PrismaDBClient.getInstance();
-    const passwordService = new PasswordService(logger);
-
     const { username, password } = req.body;
-    const userService = new UserService(dbClient, passwordService, logger);
+    const userService = Factory.getInstance("UserService");
 
     try {
         const createdUser = await userService.create({ username, password });
@@ -62,10 +56,7 @@ router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response
 
     logger.debug(`GET Request coming into /user/${id}`);
 
-    const dbClient = PrismaDBClient.getInstance();
-    const passwordService = new PasswordService(logger);
-
-    const userService = new UserService(dbClient, passwordService, logger);
+    const userService = Factory.getInstance("UserService");
 
     try {
         const matchingUser = await userService.findById(id);
@@ -89,8 +80,7 @@ router.post("/:id/books", async (req: Request<UserBooksRequestParams, unknown, U
     const { id: userId } = req.params;
     const { bookId } = req.body;
 
-    const dbClient = PrismaDBClient.getInstance();
-    const userBooksService = new UserBooksService(dbClient, logger);
+    const userBooksService = Factory.getInstance("UserBooksService");
 
     try {
         await userBooksService.addBookToUser(userId, bookId);

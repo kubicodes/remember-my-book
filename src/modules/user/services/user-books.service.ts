@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { Logger } from "pino";
 import { UserNotFoundError } from "../schemas/custom-errors.schema";
 
+export const name = "UserBooksService";
+
 export interface IUserBooksService {
     addBookToUser(userId: string, bookId: string): Promise<boolean>;
 }

@@ -1,5 +1,7 @@
 import { GoogleBooksApiResponse, GoogleBooksItem, ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
 
+export const name = "GoogleBooksResolver";
+
 export interface IGoogleBooksResolver {
     resolve(response: GoogleBooksApiResponse, limit: number, offset: number): ResolvedGoogleBooksResponse;
 }

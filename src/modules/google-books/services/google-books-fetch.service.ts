@@ -5,6 +5,7 @@ import { Logger } from "pino";
 import { SchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
 import { GoogleBooksApiResponse, GoogleBooksItem, GoogleBooksItemSchema } from "../schemas/google-books.schema";
 
+export const name = "GoogleBooksFetchService";
 export interface IGoogleBooksFetchService {
     fetch(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse>;
 }

@@ -6,6 +6,8 @@ import { PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE } from "../../database/const
 import { IPasswordService } from "../../auth/password.service";
 import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 
+export const name = "UserService";
+
 export interface UserCreateOptions {
     username: string;
     password: string;

@@ -1,14 +1,9 @@
 import express, { Router, Request, Response } from "express";
-import { getApplicationConfig } from "../../../shared/application-config/helpers/get-application-config.helper";
 import { logger } from "../../../shared/logger/logger";
-import { getRedisClientSingleton } from "../../../shared/redis-client/get-redis-client";
-import { AjvSchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
-import googleBooksApiClient from "../api-clients/google-books.client";
+import { Factory } from "../../factory/services/factory.service";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
-import { GoogleBooksResolver } from "../resolvers/google-books.resolver";
 import { ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
-import { GoogleBooksFetchService } from "../services/google-books-fetch.service";
 
 interface RequestQuery {
     query: string;
@@ -36,11 +31,8 @@ router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, re
         return;
     }
 
-    const { redis: redisConfig } = getApplicationConfig();
-    const redis = getRedisClientSingleton(redisConfig);
-
-    const googleBooksFetchService = new GoogleBooksFetchService(new AjvSchemaValidationService(), googleBooksApiClient, redis, logger);
-    const googleBooksResolver = new GoogleBooksResolver();
+    const googleBooksFetchService = Factory.getInstance("GoogleBooksFetchService");
+    const googleBooksResolver = Factory.getInstance("GoogleBooksResolver");
 
     try {
         // TODO: Standardize query to avoid duplicates in cache
