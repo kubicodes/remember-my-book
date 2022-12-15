@@ -13,5 +13,10 @@ export function getRedisClientSingleton(redisConfig: RedisConfig): Redis {
         });
     }
 
+    // needed in order to stop the client during tests
+    if (process.env.NODE_ENV === "test") {
+        redis.quit();
+    }
+
     return redis;
 }
