@@ -4,7 +4,7 @@ import { isUsernameValid } from "../helpers/user-validation.helper";
 import { BCRYPT_SALT_ROUNDS } from "../../../shared/constants/constants";
 import { PRISMA_UNIQUE_CONSTRAINT_FAILED_ERROR_CODE } from "../../database/constants/database.constants";
 import { IPasswordService } from "../../auth/password.service";
-import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
+import { InvalidPassword, InvalidUsername, UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 
 export const name = "UserService";
 
@@ -26,12 +26,12 @@ export class UserService implements IUserService {
 
         const isValidUsername = isUsernameValid(username);
         if (!isValidUsername) {
-            throw new Error("Username does not match the requirements.");
+            throw new InvalidUsername("Username does not match the requirements.");
         }
 
         const isValidPassword = this.passwordService.isValidPassword(password);
         if (!isValidPassword) {
-            throw new Error("Password does not matche the requirements.");
+            throw new InvalidPassword("Password does not match the requirements.");
         }
 
         try {

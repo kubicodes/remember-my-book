@@ -34,7 +34,7 @@ describe("User Service", () => {
             const password = "password";
 
             await expect(() => userService.create({ username: invalidUsername, password })).rejects.toThrowError(
-                "Password does not matche the requirements.",
+                "Password does not match the requirements.",
             );
         });
 

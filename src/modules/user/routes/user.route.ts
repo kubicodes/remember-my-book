@@ -2,7 +2,7 @@ import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
 import { ServiceFactory } from "../../factory/services/factory.service";
-import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
+import { CustomError, UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
 
 interface CreateUserRequestBody {
@@ -42,7 +42,7 @@ router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, r
         logger.error({ msg: "Error while creating user", err: (error as Error).message });
 
         // when the error is from this type we want to expose the internal error as well, as it's well formatted
-        const errorMessage = error instanceof UserAlreadyExistsError ? `Error while creating user. ${error.message}` : "Error while creating user.";
+        const errorMessage = error instanceof CustomError ? `Error while creating user. ${error.message}` : "Error while creating user.";
 
         res.status(500);
         res.send({
