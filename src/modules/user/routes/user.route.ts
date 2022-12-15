@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
-import { Factory } from "../../factory/services/factory.service";
+import { ServiceFactory } from "../../factory/services/factory.service";
 import { UserAlreadyExistsError, UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
 
@@ -28,7 +28,7 @@ router.post("/", async (req: Request<unknown, unknown, CreateUserRequestBody>, r
     logger.debug("POST Request coming into /user");
 
     const { username, password } = req.body;
-    const userService = Factory.getInstance("UserService");
+    const userService = ServiceFactory.getUserService();
 
     try {
         const createdUser = await userService.create({ username, password });
@@ -56,7 +56,7 @@ router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response
 
     logger.debug(`GET Request coming into /user/${id}`);
 
-    const userService = Factory.getInstance("UserService");
+    const userService = ServiceFactory.getUserService();
 
     try {
         const matchingUser = await userService.findById(id);
@@ -80,7 +80,7 @@ router.post("/:id/books", async (req: Request<UserBooksRequestParams, unknown, U
     const { id: userId } = req.params;
     const { bookId } = req.body;
 
-    const userBooksService = Factory.getInstance("UserBooksService");
+    const userBooksService = ServiceFactory.getUserBooksService();
 
     try {
         await userBooksService.addBookToUser(userId, bookId);

@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
-import { Factory } from "../../factory/services/factory.service";
+import { ServiceFactory } from "../../factory/services/factory.service";
 import { normalizeQuery } from "../helpers/normalize-query.helper";
 import { ResolvedGoogleBooksResponse } from "../schemas/google-books.schema";
 
@@ -31,8 +31,8 @@ router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, re
         return;
     }
 
-    const googleBooksFetchService = Factory.getInstance("GoogleBooksFetchService");
-    const googleBooksResolver = Factory.getInstance("GoogleBooksResolver");
+    const googleBooksFetchService = ServiceFactory.getGoogleBooksFetchService();
+    const googleBooksResolver = ServiceFactory.getGoogleBooksResolver();
 
     try {
         // TODO: Standardize query to avoid duplicates in cache
