@@ -32,11 +32,11 @@ describe("Google Books Fetch Service", () => {
             mockApiClient.get.mockResolvedValueOnce({ data: { totalItems: 1, items: [{ id: "id" }] } });
             mockValidateFn.mockReturnValueOnce(true);
 
-            await googleBooksFetchService.fetch(query, 0, 1);
+            await googleBooksFetchService.fetchByQuery(query, 0, 1);
 
             mockRedis.get.mockResolvedValueOnce(JSON.stringify([{ id: "id" }]));
 
-            await googleBooksFetchService.fetch(query, 0, 1);
+            await googleBooksFetchService.fetchByQuery(query, 0, 1);
 
             expect(mockApiClient.get).toHaveBeenCalledTimes(1);
         });
@@ -48,7 +48,7 @@ describe("Google Books Fetch Service", () => {
             mockValidateFn.mockReturnValueOnce(true);
             mockValidateFn.errors = [{ instancePath: "instancePath", keyword: "keyword", params: { param: "param" }, schemaPath: "schemPath" }];
 
-            const result = await googleBooksFetchService.fetch(query, 0, 2);
+            const result = await googleBooksFetchService.fetchByQuery(query, 0, 2);
 
             expect(mockLogger.error).toHaveBeenCalledTimes(1);
             expect(result.totalItems).toBe(1);
@@ -63,7 +63,7 @@ describe("Google Books Fetch Service", () => {
             mockValidateFn.mockReturnValueOnce(true);
             mockValidateFn.mockReturnValueOnce(true);
 
-            const result = await googleBooksFetchService.fetch(query, 0, 2);
+            const result = await googleBooksFetchService.fetchByQuery(query, 0, 2);
 
             expect(mockApiClient.get).toHaveBeenCalledTimes(1);
             expect(result.totalItems).toBe(2);
@@ -80,7 +80,7 @@ describe("Google Books Fetch Service", () => {
 
             mockApiClient.get.mockRejectedValueOnce({ status: 500 });
 
-            const result = await googleBooksFetchService.fetch(query, 0, 2);
+            const result = await googleBooksFetchService.fetchByQuery(query, 0, 2);
 
             expect(result.totalItems).toBe(1);
             expect(result.items.length).toBe(1);

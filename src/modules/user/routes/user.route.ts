@@ -1,8 +1,11 @@
+import { Book } from "@prisma/client";
 import express, { Router, Request, Response } from "express";
 import { logger } from "../../../shared/logger/logger";
+import { CustomError } from "../../../shared/schema/custom-error.schema";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
 import { ServiceFactory } from "../../factory/services/factory.service";
-import { CustomError, UserNotFoundError } from "../schemas/custom-errors.schema";
+import { GoogleBooksItem } from "../../google-books/schemas/google-books.schema";
+import { UserNotFoundError } from "../schemas/custom-errors.schema";
 import { UserApiResponse } from "../schemas/user-api-response.schema";
 
 interface CreateUserRequestBody {
@@ -65,6 +68,49 @@ router.get("/:id", async (req: Request<FindUserByIdRequestParams>, res: Response
         res.send({
             message: "Successfully found matching user",
             user: { id: matchingUser.id, username: matchingUser.username, createdAt: matchingUser.createdAt, updatedAt: matchingUser.updatedAt },
+        });
+    } catch (error) {
+        const errorMessage = error instanceof UserNotFoundError ? error.message : `Error while finding user with ID ${id}`;
+
+        res.status(500);
+        res.send({
+            message: errorMessage,
+        });
+    }
+});
+
+router.get("/:id/books", async (req: Request<FindUserByIdRequestParams>, res: Response<UserApiResponse | GenericApiResponse>) => {
+    const id = req.params.id;
+
+    logger.debug(`GET Request coming into /user/${id}/books`);
+
+    const userService = ServiceFactory.getUserService();
+    const fetchService = ServiceFactory.getGoogleBooksFetchService();
+    const googleBooksResolver = ServiceFactory.getGoogleBooksResolver();
+
+    try {
+        const matchingUser = await userService.findById(id, true);
+        const bookIds = matchingUser.books?.map((book: Book) => book.bookId);
+        let resolvedBooks: GoogleBooksItem[] = [];
+        if (!bookIds || !bookIds?.length) {
+            resolvedBooks = [];
+        } else {
+            for (const id of bookIds) {
+                const item = await fetchService.fetchById(id);
+                resolvedBooks.push(googleBooksResolver.resolveItem(item));
+            }
+        }
+
+        res.status(200);
+        res.send({
+            message: "Successfully found matching user",
+            user: {
+                id: matchingUser.id,
+                username: matchingUser.username,
+                createdAt: matchingUser.createdAt,
+                updatedAt: matchingUser.updatedAt,
+                books: resolvedBooks,
+            },
         });
     } catch (error) {
         const errorMessage = error instanceof UserNotFoundError ? error.message : `Error while finding user with ID ${id}`;

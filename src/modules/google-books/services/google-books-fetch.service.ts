@@ -3,11 +3,13 @@ import { AxiosInstance } from "axios";
 import Redis from "ioredis";
 import { Logger } from "pino";
 import { SchemaValidationService } from "../../../shared/schema-validation/schema-validation.service";
+import { InvalidGoogleBooksItem } from "../schemas/custom-errors.schema";
 import { GoogleBooksApiResponse, GoogleBooksItem, GoogleBooksItemSchema } from "../schemas/google-books.schema";
 
 export const name = "GoogleBooksFetchService";
 export interface IGoogleBooksFetchService {
-    fetch(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse>;
+    fetchByQuery(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse>;
+    fetchById(id: string): Promise<GoogleBooksItem>;
 }
 
 export class GoogleBooksFetchService implements IGoogleBooksFetchService {
@@ -22,7 +24,7 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
         this.schemaValidationFn = this.schemaValidationService.getValidationFunction(GoogleBooksItemSchema);
     }
 
-    public async fetch(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse> {
+    public async fetchByQuery(query: string, offset: number, limit: number): Promise<GoogleBooksApiResponse> {
         const cachedData = await this.redisClient.get(JSON.stringify({ query, limit, offset }));
         const cachedItems = cachedData ? (JSON.parse(cachedData) as GoogleBooksItem[]) : undefined;
 
@@ -49,6 +51,26 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
         this.redisClient.set(JSON.stringify({ query, limit, offset }), JSON.stringify([...new Set(items)]));
 
         return { totalItems: validItems.length, items: validItems };
+    }
+
+    public async fetchById(id: string): Promise<GoogleBooksItem> {
+        const cachedData = await this.redisClient.get(id);
+        console.log("cached data: ", cachedData);
+        if (cachedData) {
+            return JSON.parse(cachedData) as GoogleBooksItem;
+        }
+
+        const { data } = await this.apiClient.get<GoogleBooksItem>(`/volumes/${id}`);
+
+        if (!this.isValid(data)) {
+            this.logValidationErrors(this.schemaValidationFn.errors as ErrorObject[]);
+
+            throw new InvalidGoogleBooksItem(`Google Books Item with ID ${id} is invalid.`);
+        }
+
+        this.redisClient.set(id, JSON.stringify(data));
+
+        return data;
     }
 
     private isValid(item: GoogleBooksItem): boolean {

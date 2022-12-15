@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import { Book, PrismaClient, User } from "@prisma/client";
 import { Logger } from "pino";
 import { isUsernameValid } from "../helpers/user-validation.helper";
 import { BCRYPT_SALT_ROUNDS } from "../../../shared/constants/constants";
@@ -15,7 +15,7 @@ export interface UserCreateOptions {
 
 export interface IUserService {
     create(options: UserCreateOptions): Promise<User>;
-    findById(id: string): Promise<User>;
+    findById(id: string, includeBooks?: boolean): Promise<User & { books?: Book[] }>;
 }
 
 export class UserService implements IUserService {
@@ -52,9 +52,9 @@ export class UserService implements IUserService {
         }
     }
 
-    public async findById(id: string): Promise<User> {
+    public async findById(id: string, includeBooks?: boolean): Promise<User & { books?: Book[] }> {
         try {
-            const matchingUser = await this.dbClient.user.findUnique({ where: { id } });
+            const matchingUser = await this.dbClient.user.findUnique({ where: { id }, include: { books: !!includeBooks } });
 
             if (matchingUser === null) {
                 throw new UserNotFoundError(`User with ID ${id} does not exist`);
