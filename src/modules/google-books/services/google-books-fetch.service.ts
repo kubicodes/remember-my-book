@@ -55,7 +55,6 @@ export class GoogleBooksFetchService implements IGoogleBooksFetchService {
 
     public async fetchById(id: string): Promise<GoogleBooksItem> {
         const cachedData = await this.redisClient.get(id);
-        console.log("cached data: ", cachedData);
         if (cachedData) {
             return JSON.parse(cachedData) as GoogleBooksItem;
         }
