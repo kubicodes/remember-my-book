@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Book, PrismaClient } from "@prisma/client";
 import { mock, mockDeep, mockReset } from "jest-mock-extended";
 import { Logger } from "pino";
 import { UserNotFoundError } from "../schemas/custom-errors.schema";
@@ -18,6 +18,10 @@ describe("User Books Service", () => {
 
     describe("addBookToUser", () => {
         it("returns true when the update function of the prisma client does not throw an error", async () => {
+            const mockBook = mock<Book>();
+            mockBook.id = "id";
+            jest.spyOn(mockDbClient.book, "findFirst").mockResolvedValueOnce(mockBook);
+
             const result = await userBooksService.addBookToUser("userId", "bookId");
 
             expect(result).toBe(true);
@@ -28,6 +32,10 @@ describe("User Books Service", () => {
                 throw new Error("Required exactly one parent ID to be present for connect query, found 0");
             });
 
+            const mockBook = mock<Book>();
+            mockBook.id = "id";
+            jest.spyOn(mockDbClient.book, "findFirst").mockResolvedValueOnce(mockBook);
+
             await expect(() => userBooksService.addBookToUser("invalid-user-id", "bookId")).rejects.toThrow(UserNotFoundError);
             expect(mockLogger.error).toHaveBeenCalledWith({ msg: "Can not add books to not existing User with ID invalid-user-id" });
         });
@@ -36,6 +44,10 @@ describe("User Books Service", () => {
             jest.spyOn(mockDbClient.user, "update").mockImplementationOnce(() => {
                 throw new Error("Error while updating");
             });
+
+            const mockBook = mock<Book>();
+            mockBook.id = "id";
+            jest.spyOn(mockDbClient.book, "findFirst").mockResolvedValueOnce(mockBook);
 
             const result = await userBooksService.addBookToUser("user-id", "book-id");
 

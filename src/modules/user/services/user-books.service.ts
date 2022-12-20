@@ -12,9 +12,6 @@ export class UserBooksService implements IUserBooksService {
     constructor(private dbClient: PrismaClient, private logger: Logger) {}
 
     public async addBookToUser(userId: string, bookId: string): Promise<boolean> {
-        console.log("angekommen");
-        await this.dbClient.book.deleteMany({});
-
         try {
             let internalBookId = (await this.dbClient.book.findFirst({ where: { bookId } }))?.id;
 
