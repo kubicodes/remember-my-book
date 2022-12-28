@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { logger } from "../../../shared/logger/logger";
 import { IPasswordService, PasswordService } from "../../auth/password.service";
 import { GoogleBooksFetchService, IGoogleBooksFetchService } from "../../google-books/services/google-books-fetch.service";
@@ -9,6 +10,7 @@ import { getApplicationConfig } from "../../../shared/application-config/helpers
 import googleBooksClient from "../../google-books/api-clients/google-books.client";
 import { getRedisClientSingleton } from "../../../shared/redis-client/get-redis-client";
 import { GoogleBooksResolver, IGoogleBooksResolver } from "../../google-books/resolvers/google-books.resolver";
+import { IUserAggregatorService, UserAggregatorService } from "../../user/services/user-aggregator.service";
 
 // using singleton for existing services, as multiple instances are not needed for the current ones
 export class ServiceFactory {
@@ -17,6 +19,7 @@ export class ServiceFactory {
     private static googleBooksResolver: IGoogleBooksResolver;
     private static userBooksService: IUserBooksService;
     private static userService: IUserService;
+    private static userAggregatorService: IUserAggregatorService;
     // Services which don't need to be instanciated here, but used for dependency injection
     private static schemaValidationService = new AjvSchemaValidationService();
     private static applicationConfig = getApplicationConfig();
@@ -53,6 +56,18 @@ export class ServiceFactory {
         }
 
         return this.userService;
+    }
+
+    public static getUserAggregatorService(): IUserAggregatorService {
+        if (!this.userAggregatorService) {
+            this.userAggregatorService = new UserAggregatorService(
+                this.getUserService(),
+                this.getGoogleBooksFetchService(),
+                this.getGoogleBooksResolver(),
+            );
+        }
+
+        return this.userAggregatorService;
     }
 
     public static getPasswordService(): IPasswordService {
