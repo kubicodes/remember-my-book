@@ -35,9 +35,8 @@ router.get("/", async (req: Request<unknown, unknown, unknown, RequestQuery>, re
     const googleBooksResolver = ServiceFactory.getGoogleBooksResolver();
 
     try {
-        // TODO: Standardize query to avoid duplicates in cache
-        const googleBooksResponse = await googleBooksFetchService.fetch(normalizeQuery(query), parsedOffset, parsedLimit);
-        const resolvedResponse = googleBooksResolver.resolve(googleBooksResponse, parsedLimit, parsedOffset);
+        const googleBooksResponse = await googleBooksFetchService.fetchByQuery(normalizeQuery(query), parsedOffset, parsedLimit);
+        const resolvedResponse = googleBooksResolver.resolveQueryResponse(googleBooksResponse, parsedLimit, parsedOffset);
 
         res.send(resolvedResponse);
 

@@ -11,7 +11,7 @@ describe("Google Books Resolver", () => {
     describe("resolve", () => {
         it("resolves total, count, limit and offset properly", () => {
             const response = getGoogleBooksApiResponse({ totalItems: 1 });
-            const result = googleBooksResolver.resolve(response, 1, 0);
+            const result = googleBooksResolver.resolveQueryResponse(response, 1, 0);
 
             expect(result.count).toBe(1);
             expect(result.limit).toBe(1);
@@ -31,7 +31,7 @@ describe("Google Books Resolver", () => {
                     publishedDate: "22-10-2022",
                 },
             });
-            const result = googleBooksResolver.resolve(response, 1, 0);
+            const result = googleBooksResolver.resolveQueryResponse(response, 1, 0);
 
             expect(result.items[0].volumeInfo.title).toBe("title");
             expect(result.items[0].volumeInfo.subtitle).toBe("subtitle");
@@ -57,7 +57,7 @@ describe("Google Books Resolver", () => {
                 ],
             };
 
-            const result = googleBooksResolver.resolve(response, 1, 0);
+            const result = googleBooksResolver.resolveQueryResponse(response, 1, 0);
 
             expect(result).toEqual({
                 count: 1,
