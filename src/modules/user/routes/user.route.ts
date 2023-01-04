@@ -4,7 +4,7 @@ import { CustomError } from "../../../shared/schema/custom-error.schema";
 import { GenericApiResponse } from "../../../shared/schema/generic-api-response.schema";
 import { ServiceFactory } from "../../factory/services/factory.service";
 import { UserNotFoundError } from "../schemas/custom-errors.schema";
-import { UserApiResponse } from "../schemas/user-api-response.schema";
+import { UserApiResponse } from "../schemas/user.schema";
 
 interface CreateUserRequestBody {
     username: string;
