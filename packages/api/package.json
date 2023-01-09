@@ -3,7 +3,7 @@
     "scripts": {
         "start:dev": "npm run prisma:migrate:dev && NODE_ENV=development nodemon -L './**/*.ts' --exec 'ts-node' src/app.ts",
         "clean": "rimraf ./dist",
-        "build": "npm run clean && tsc",
+        "build": "npm run prisma:generate && npm run clean && tsc",
         "test": "NODE_ENV=test jest",
         "prisma:migrate:dev": "prisma migrate dev",
         "prisma:migrate:deploy": "prisma migrate deploy",

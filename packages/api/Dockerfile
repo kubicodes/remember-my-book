@@ -26,9 +26,6 @@ COPY . .
 
 WORKDIR /usr/src/app/packages/api
 
-# Necessary to get the types of prisma, otherwise build fails
-RUN npm run prisma:generate
-
 RUN npm run build
 
 # Production Container
