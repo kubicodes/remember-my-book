@@ -1,7 +1,7 @@
 import { Book, User } from "@prisma/client";
-import { IGoogleBooksResolver } from "src/modules/google-books/resolvers/google-books.resolver";
-import { GoogleBooksItem } from "src/modules/google-books/schemas/google-books.schema";
-import { IGoogleBooksFetchService } from "src/modules/google-books/services/google-books-fetch.service";
+import { GoogleBooksItem } from "../../google-books/schemas/google-books.schema";
+import { IGoogleBooksFetchService } from "../../google-books/services/google-books-fetch.service";
+import { IGoogleBooksResolver } from "../../google-books/resolvers/google-books.resolver";
 import { IUserService } from "./user.service";
 
 export interface IUserAggregatorService {

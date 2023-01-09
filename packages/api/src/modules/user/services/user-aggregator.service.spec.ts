@@ -1,6 +1,6 @@
 import { mock, mockReset } from "jest-mock-extended";
-import { IGoogleBooksResolver } from "src/modules/google-books/resolvers/google-books.resolver";
-import { IGoogleBooksFetchService } from "src/modules/google-books/services/google-books-fetch.service";
+import { IGoogleBooksResolver } from "../../google-books/resolvers/google-books.resolver";
+import { IGoogleBooksFetchService } from "../../google-books/services/google-books-fetch.service";
 import { getMockBooks, getMockUser } from "../data/user-test.data";
 import { IUserAggregatorService, UserAggregatorService } from "./user-aggregator.service";
 import { IUserService } from "./user.service";
